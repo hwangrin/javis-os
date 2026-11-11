@@ -426,6 +426,7 @@ async def generate_chatgpt(prompt: str, aspect_ratio: str = "square", quality: s
     err: Optional[str] = None
     da_thu: list = []
     creds = None
+    had_credential = False
     for account_key in accounts:
         try:
             creds = (openai_oauth.valid_creds() if account_key == "main"
@@ -434,6 +435,7 @@ async def generate_chatgpt(prompt: str, aspect_ratio: str = "square", quality: s
             creds = None
         if not creds or not creds.get("access_token") or creds.get("stale"):
             continue
+        had_credential = True
         headers = _headers(creds["access_token"], creds.get("account_id") or "")
         da_thu = []
         hang_doi = host_model_candidates()
@@ -473,7 +475,7 @@ async def generate_chatgpt(prompt: str, aspect_ratio: str = "square", quality: s
         # are not evidence that another account would solve the problem.
         break
 
-    if creds is None or not creds.get("access_token"):
+    if not had_credential:
         return {"ok": False, "error": localefmt.chu("Chưa kết nối ChatGPT (OAuth). Vào trang Model đăng nhập ChatGPT rồi thử lại.",
                                                 "ChatGPT (OAuth) is not connected. Sign in to ChatGPT on the Models page and try again.")}
 
